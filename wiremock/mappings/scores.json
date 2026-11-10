@@ -1,0 +1,18 @@
+{
+  "mappings": [
+    { "request": { "method": "GET", "url": "/scores/12345678901" },
+      "response": { "status": 200, "headers": { "Content-Type": "application/json" },
+        "jsonBody": { "cpf": "12345678901", "score": 750, "classification": "LOW_RISK" } } },
+    { "request": { "method": "GET", "urlPattern": "/scores/0{10}[0-9]" },
+      "response": { "status": 404, "headers": { "Content-Type": "application/json" }, "jsonBody": { "error": "not found" } } },
+    { "request": { "method": "GET", "url": "/scores/99999999999" },
+      "response": { "status": 500 } },
+    { "request": { "method": "GET", "url": "/scores/88888888888" },
+      "response": { "status": 200, "fixedDelayMilliseconds": 10000, "headers": { "Content-Type": "application/json" },
+        "jsonBody": { "cpf": "88888888888", "score": 500, "classification": "MEDIUM_RISK" } } },
+    { "request": { "method": "GET", "urlPattern": "/scores/[0-9]{11}" },
+      "priority": 10,
+      "response": { "status": 200, "headers": { "Content-Type": "application/json" },
+        "jsonBody": { "score": 600, "classification": "MEDIUM_RISK" } } }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "realm": "customers",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 3600,
+  "roles": { "realm": [ { "name": "USER" }, { "name": "ADMIN" } ] },
+  "clients": [
+    {
+      "clientId": "customers-api",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "user", "enabled": true, "emailVerified": true,
+      "firstName": "Regular", "lastName": "User", "email": "user@example.com",
+      "credentials": [ { "type": "password", "value": "user123", "temporary": false } ],
+      "realmRoles": [ "USER" ]
+    },
+    {
+      "username": "admin", "enabled": true, "emailVerified": true,
+      "firstName": "Admin", "lastName": "User", "email": "admin@example.com",
+      "credentials": [ { "type": "password", "value": "admin123", "temporary": false } ],
+      "realmRoles": [ "ADMIN", "USER" ]
+    }
+  ]
+}

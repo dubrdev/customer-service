@@ -1,0 +1,72 @@
+spring:
+  application.name: customer-service
+  threads.virtual.enabled: true  # Java 21+/25: virtual threads for blocking I/O (HTTP, JDBC, AMQP)
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/customers}
+    username: ${DB_USER:customers}
+    password: ${DB_PASSWORD:customers}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      connection-timeout: 3000
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+  flyway.enabled: true
+  data:
+    web.pageable.max-page-size: 100
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      timeout: 500ms
+      connect-timeout: 500ms
+  cache:
+    type: redis
+    redis.time-to-live: 10m
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    template:
+      retry: { enabled: true, max-attempts: 3, initial-interval: 200ms, multiplier: 2 }
+    listener.simple:
+      default-requeue-rejected: false     # after retries the message goes to the DLQ
+      retry: { enabled: true, max-attempts: 3, initial-interval: 1s, multiplier: 2, max-interval: 10s }
+  security.oauth2.resourceserver.jwt:
+    # Dev: only signature/expiry are validated. In production set issuer-uri to also validate "iss".
+    jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8180/realms/customers/protocol/openid-connect/certs}
+
+score:
+  base-url: ${SCORE_BASE_URL:http://localhost:8089}
+  connect-timeout: ${SCORE_CONNECT_TIMEOUT:1s}
+  read-timeout: ${SCORE_READ_TIMEOUT:2s}
+
+resilience4j:
+  circuitbreaker.instances.score:
+    sliding-window-size: 10
+    minimum-number-of-calls: 5
+    failure-rate-threshold: 50
+    wait-duration-in-open-state: 10s
+    permitted-number-of-calls-in-half-open-state: 3
+    automatic-transition-from-open-to-half-open-enabled: true
+    record-exceptions: [com.example.customers.exception.ScoreUnavailableException]
+  retry.instances.score:
+    max-attempts: 3
+    wait-duration: 200ms
+    enable-exponential-backoff: true
+    exponential-backoff-multiplier: 2
+    retry-exceptions: [com.example.customers.exception.ScoreUnavailableException]
+
+management:
+  endpoints.web.exposure.include: health,info,metrics,prometheus
+  endpoint.health:
+    probes.enabled: true
+    group.readiness.include: readinessState,db,rabbit
+  metrics.tags.application: ${spring.application.name}
+  dynatrace.metrics.export:           # optional APM export (see README, "Observability")
+    enabled: ${DT_METRICS_ENABLED:false}
+    uri: ${DT_METRICS_URI:}
+    api-token: ${DT_API_TOKEN:}
+
+server.shutdown: graceful
+spring.lifecycle.timeout-per-shutdown-phase: 20s

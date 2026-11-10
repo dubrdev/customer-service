@@ -1,0 +1,52 @@
+# =========================================================================
+# Java 25 & Spring Boot Standard .gitignore
+# =========================================================================
+# --- Compilação e Artefatos (Maven) ---
+target/
+*.jar
+*.war
+*.ear
+*.nar
+*.car
+*.jacoco
+*.exec
+
+# --- Compilação e Artefatos (Gradle) ---
+.gradle/
+build/
+/out/
+
+# --- Logs e Arquivos em Tempo de Execução ---
+*.log
+logs/
+media/
+
+# --- Configurações das IDEs ---
+
+## IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+## Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+*.launch
+
+## Visual Studio Code
+.vscode/
+
+# --- Arquivos do Sistema Operacional ---
+.DS_Store
+Thumbs.db
+
+# --- Segurança e Configurações Sensíveis (IMPORTANTE) ---
+# Nunca envie credenciais, chaves ou senhas para o repositório
+.env
+.env.*
+application-local.properties
+application-local.yml
