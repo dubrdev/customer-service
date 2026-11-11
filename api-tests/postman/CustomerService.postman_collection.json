@@ -1,0 +1,334 @@
+{
+  "info": {
+    "_postman_id": "ba4c88db-13fd-4c36-a6f1-0e8c52111d4f",
+    "name": "Customer Service - API",
+    "description": "Testes funcionais da API de clientes. Execute a coleção em ordem: ela cria um cliente, valida os endpoints e o remove ao final. Requer a aplicação e o PostgreSQL.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "cpf",
+      "value": ""
+    },
+    {
+      "key": "customerName",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Criar cliente",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cpf = String(10000000000 + Math.floor(Math.random() * 90000000000));",
+              "pm.collectionVariables.set('cpf', cpf);",
+              "pm.collectionVariables.set('customerName', 'ClienteTeste-' + Date.now());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cliente criado (201)', function () {",
+              "    pm.response.to.have.status(201);",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.id).to.exist;",
+              "    pm.expect(body.cpf).to.eql(pm.collectionVariables.get('cpf'));",
+              "    pm.collectionVariables.set('customerId', body.id);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{customerName}}\",\n  \"cpf\": \"{{cpf}}\",\n  \"email\": \"teste.{{cpf}}@exemplo.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/customers"
+      }
+    },
+    {
+      "name": "Criar cliente com dados inválidos (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Requisição inválida retorna 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\",\n  \"cpf\": \"123\",\n  \"email\": \"email-invalido\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/customers"
+      }
+    },
+    {
+      "name": "Criar cliente com CPF repetido (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('CPF duplicado retorna 409', function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Cliente Duplicado\",\n  \"cpf\": \"{{cpf}}\",\n  \"email\": \"duplicado.{{cpf}}@exemplo.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/customers"
+      }
+    },
+    {
+      "name": "Consultar cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cliente encontrado (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get('customerId')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/{{customerId}}"
+      }
+    },
+    {
+      "name": "Listar clientes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Lista de clientes retornada (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers?page=0&size=20"
+      }
+    },
+    {
+      "name": "Listar clientes por status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Filtro por status retorna apenas clientes ACTIVE (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.response.json().forEach(function (customer) {",
+              "        pm.expect(customer.status).to.eql('ACTIVE');",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers?status=ACTIVE&page=0&size=20"
+      }
+    },
+    {
+      "name": "Buscar cliente por nome",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Busca por nome encontra o cliente criado (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const ids = pm.response.json().map(function (customer) { return customer.id; });",
+              "    pm.expect(ids).to.include(Number(pm.collectionVariables.get('customerId')));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/search?name={{customerName}}&page=0&size=20"
+      }
+    },
+    {
+      "name": "Atualizar cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cliente atualizado (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().status).to.eql('INACTIVE');",
+              "    pm.expect(pm.response.json().email).to.eql('atualizado.' + pm.collectionVariables.get('cpf') + '@exemplo.com');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{customerName}} Atualizado\",\n  \"cpf\": \"{{cpf}}\",\n  \"email\": \"atualizado.{{cpf}}@exemplo.com\",\n  \"status\": \"INACTIVE\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/customers/{{customerId}}"
+      }
+    },
+    {
+      "name": "Consultar score",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Score consultado (200)', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().cpf).to.eql(pm.collectionVariables.get('cpf'));",
+              "    pm.expect(pm.response.json().score).to.be.a('number');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/{{customerId}}/score"
+      }
+    },
+    {
+      "name": "Excluir cliente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cliente excluído (204)', function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/customers/{{customerId}}"
+      }
+    },
+    {
+      "name": "Consultar cliente excluído (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Cliente removido não é encontrado (404)', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/customers/{{customerId}}"
+      }
+    }
+  ]
+}

@@ -1,55 +1,50 @@
+# Sobe tudo que o serviço precisa:
+#   docker compose up -d postgres rabbitmq score-mock   -> só as dependências (rode a app pela IDE/Maven)
+#   docker compose up --build                           -> tudo, inclusive a aplicação
 services:
   postgres:
     image: postgres:16-alpine
-    environment: { POSTGRES_DB: customers, POSTGRES_USER: customers, POSTGRES_PASSWORD: customers }
-    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: customers
+      POSTGRES_USER: customers
+      POSTGRES_PASSWORD: customers
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U customers -d customers"]
       interval: 5s
-      timeout: 3s
       retries: 10
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    ports: ["5672:5672", "15672:15672"]   # UI: http://localhost:15672 (guest/guest)
+    ports:
+      - "5672:5672"
+      - "15672:15672"      # painel: http://localhost:15672 (guest / guest)
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
-      timeout: 5s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    ports: ["6379:6379"]
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0
-    command: start-dev --import-realm
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    ports: ["8180:8080"]
-    volumes: ["./keycloak:/opt/keycloak/data/import:ro"]
-
+  # Finge ser o serviço de score (veja mock-score/mappings/scores.json)
   score-mock:
     image: wiremock/wiremock:3.9.1
-    ports: ["8089:8080"]
-    volumes: ["./wiremock:/home/wiremock:ro"]
+    ports:
+      - "8089:8080"
+    volumes:
+      - ./mock-score:/home/wiremock:ro
 
   app:
     build: .
     depends_on:
-      postgres: { condition: service_healthy }
-      rabbitmq: { condition: service_healthy }
-      redis: { condition: service_started }
-      keycloak: { condition: service_started }
-      score-mock: { condition: service_started }
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      score-mock:
+        condition: service_started
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/customers
-      DB_USER: customers
-      DB_PASSWORD: customers
       RABBIT_HOST: rabbitmq
-      REDIS_HOST: redis
       SCORE_BASE_URL: http://score-mock:8080
-      JWT_JWK_SET_URI: http://keycloak:8080/realms/customers/protocol/openid-connect/certs
-    ports: ["8080:8080"]
+    ports:
+      - "8080:8080"

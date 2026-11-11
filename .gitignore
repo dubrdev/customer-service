@@ -1,69 +1,22 @@
-# =========================================================================
-# Java 25 & Spring Boot Standard .gitignore
-# =========================================================================
-
-# --- Compilação e Artefatos (Maven) ---
+# Maven
 target/
-*.jar
-*.war
-*.ear
-*.nar
-*.car
-*.jacoco
-*.exec
-*.zip
-*.tar.gz
-*.rar
 
-# --- Compilação e Artefatos (Gradle) ---
-.gradle/
-build/
-/out/
-
-# --- Logs e Arquivos em Tempo de Execução ---
-*.log
-logs/
-media/
-
-# --- Configurações das IDEs ---
-
-## IntelliJ IDEA
+# IDEs
 .idea/
-*.iws
 *.iml
-*.ipr
-out/
-
-## Eclipse
-.metadata/
+.vscode/
 .classpath
 .project
 .settings/
-*.launch
 
-## Visual Studio Code
-.vscode/
-
-# --- Arquivos do Sistema Operacional ---
+# Sistema operacional
 .DS_Store
 Thumbs.db
 
-# --- Segurança e Configurações Sensíveis (IMPORTANTE) ---
-# Nunca envie credenciais, chaves ou senhas para o repositório
+# Resultados do JMeter (gerados a cada execução)
+jmeter/resultados/
+jmeter/relatorio/
+jmeter.log
+
+# Variáveis locais
 .env
-.env.*
-application-local.properties
-application-local.yml
-=======
-# Compiled class file
-*.class
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*

@@ -1,15 +1,13 @@
-FROM maven:3.9-eclipse-temurin-25 AS build
+# Etapa 1: compila o projeto
+FROM maven:3.9-amazoncorretto-25 AS build
 WORKDIR /app
 COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
 COPY src src
 RUN mvn -B -q package -DskipTests
 
-FROM eclipse-temurin:25-jre
-RUN useradd -r -u 1001 app
+# Etapa 2: imagem final, só com o Java e o jar
+FROM amazoncorretto:25-al2023-headless
 WORKDIR /app
-COPY --from=build /app/target/*-exec.jar app.jar
-USER 1001
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
