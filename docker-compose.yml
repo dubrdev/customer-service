@@ -28,6 +28,7 @@ services:
   # Finge ser o serviço de score (veja mock-score/mappings/scores.json)
   score-mock:
     image: wiremock/wiremock:3.9.1
+    command: ["--global-response-templating"]
     ports:
       - "8089:8080"
     volumes:

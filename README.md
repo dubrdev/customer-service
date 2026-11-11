@@ -206,7 +206,7 @@ customer-service/
 ├── mock-score/mappings/         respostas do score de mentira
 ├── jmeter/                      planos de teste do JMeter (+ dados e script)
 └── src/
-    ├── main/java/com/example/customers/
+    ├── main/java/com/ceg/customers/
     │   ├── CustomersApplication.java
     │   ├── customer/            cadastro: Controller, Service, Repository, entidade e DTOs
     │   ├── score/               ScoreClient: consulta o serviço externo

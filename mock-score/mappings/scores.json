@@ -35,7 +35,11 @@
       "response": {
         "status": 200,
         "headers": { "Content-Type": "application/json" },
-        "jsonBody": { "score": 600, "classification": "MEDIUM_RISK" }
+        "jsonBody": {
+          "cpf": "{{request.pathSegments.[1]}}",
+          "score": 600,
+          "classification": "MEDIUM_RISK"
+        }
       }
     }
   ]
