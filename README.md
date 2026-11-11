@@ -1,5 +1,3 @@
-# customer-service
-
 Microsserviço de gerenciamento de clientes — **Java 25 · Spring Boot 3.5 · Maven · PostgreSQL · RabbitMQ · Redis · OAuth2/JWT (Keycloak) · Docker/Kubernetes**.
 
 ## Arquitetura
